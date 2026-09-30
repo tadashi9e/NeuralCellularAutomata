@@ -12,9 +12,17 @@ function start() {
     loop();
 }
 
+var cycle = 0;
+
 function loop(){
     layer.update();
-    layer.draw();
+    if (cycle == 0) {
+        layer.draw();
+    }
+    cycle += 1;
+    if (cycle > 3) {
+        cycle = 0;
+    }
     requestAnimationFrame(() => loop());
 }
 
