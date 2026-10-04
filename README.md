@@ -14,7 +14,9 @@ On top of that, an activation function is applied over each cell's state, which 
 With all this, simple neural cellular automata can be run that have the potential to produce rather complex behavior. A small set of interesting and/or visually appealing presets are included to toy around and experiment with! 🐈
 
 # Give it a go!
-Check it live on this project's [github pages site](https://luisboto.github.io/NeuralCellularAutomata/).
+Check it live on this project's [github pages site](https://tadashi9e.github.io/NeuralCellularAutomata/).
+
+Original version is [github pages site](https://luisboto.github.io/NeuralCellularAutomata/).
 
 ## Also check
 * [GPU.js](https://github.com/gpujs/gpu.js), a wonderful JavaScript library to perform GPU-accelerated computation.
