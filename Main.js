@@ -19,8 +19,8 @@ function loop(){
     if (cycle == 0) {
         layer.draw();
     }
-    cycle += 1;
-    if (cycle > 3) {
+    cycle++;
+    if (cycle >= 4) {
         cycle = 0;
     }
     requestAnimationFrame(() => loop());

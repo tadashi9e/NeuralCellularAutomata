@@ -5,18 +5,26 @@ class MainLayer {
     }
 
     initiate() {
-        this.populateCellGrid()
+        this.populateCellGrid();
         this.generateUpdateAndDrawKernels();
     }
 
     update() {
         let cellTexture = this.updateCellMatrix(columnNumber, rowNumber, this.cells, kernel);
         if (this.cells.delete) this.cells.delete();
+        this.prev_cells[2] = this.prev_cells[1];
+        this.prev_cells[1] = this.prev_cells[0];
+        this.prev_cells[0] = this.cells;
         this.cells = cellTexture;
     }
 
     draw() {
-        this.paintCells(this.cells, cellColor.r, cellColor.g, cellColor.b);
+        let history = [this.cells].concat(this.prev_cells);
+        this.paintCells(
+            history[0],
+            history[1],
+            history[2],
+            history[3]);
     }
 
     populateCellGrid() {
@@ -25,6 +33,10 @@ class MainLayer {
             this.cells[i] = []
             for (let j = 0; j < columnNumber; j++)
                 this.cells[i].push(Math.random() > 0.5 ? 1 : 0);
+        }
+        this.prev_cells = [];
+        for (let i = 1; i < 4; i++) {
+            this.prev_cells.push(this.cells);
         }
     }
 
@@ -54,11 +66,27 @@ class MainLayer {
         .setOutput([columnNumber, rowNumber])
         .setPipeline(true);
 
-        this.paintCells = this.gpu.createKernel(function(cellMatrix, r, g, b) {
-            let cellValue = cellMatrix[this.thread.y][this.thread.x];
-            cellValue > 0.1 ? this.color(r*cellValue, g*cellValue, b*cellValue, 1) : this.color(0,0,0);
-        }).setOutput([columnNumber, rowNumber])
-          .setGraphical(true);
+        this.paintCells = this.gpu.createKernel(
+            function(history0, history1, history2, history3) {
+                let h0 = history0[this.thread.y][this.thread.x];
+                let h1 = history1[this.thread.y][this.thread.x];
+                let h2 = history2[this.thread.y][this.thread.x];
+                let h3 = history3[this.thread.y][this.thread.x];
+                let g = (h0 * h1 + h2 * h3) / 2.0;
+                let r = h0 * h2;
+                let b = h1 * h3;
+                let green = (g <= 0.0 ? 0.0 :
+                             g >= 1.0 ? 1.0 :
+                             g);
+                let red = (r <= 0.0 ? 0.0 :
+                           r >= 1.0 ? 1.0 :
+                           r);
+                let blue = (b <= 0.0 ? 0.0 :
+                            b >= 1.0 ? 1.0 :
+                            b);
+                this.color(red, green, blue, 1);
+            }).setOutput([columnNumber, rowNumber])
+            .setGraphical(true);
 
         this.fillCellArea = this.gpu.createKernel(function(columnNumber, rowNumber, cellMatrix, x, y) {
             let cellValue = cellMatrix[this.thread.y][this.thread.x];
