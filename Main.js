@@ -15,8 +15,8 @@ function start() {
 var cycle = 0;
 
 function loop(){
-    layer.update();
-    if (cycle == 0) {
+    layer.update(cycle);
+    if (cycle == 3) {
         layer.draw();
     }
     cycle++;

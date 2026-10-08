@@ -9,22 +9,19 @@ class MainLayer {
         this.generateUpdateAndDrawKernels();
     }
 
-    update() {
+    update(cycle) {
         let cellTexture = this.updateCellMatrix(columnNumber, rowNumber, this.cells, kernel);
         if (this.cells.delete) this.cells.delete();
-        this.prev_cells[2] = this.prev_cells[1];
-        this.prev_cells[1] = this.prev_cells[0];
-        this.prev_cells[0] = this.cells;
+        this.phase[cycle] = cellTexture;
         this.cells = cellTexture;
     }
 
     draw() {
-        let history = [this.cells].concat(this.prev_cells);
         this.paintCells(
-            history[0],
-            history[1],
-            history[2],
-            history[3]);
+            this.phase[0],
+            this.phase[1],
+            this.phase[2],
+            this.phase[3]);
     }
 
     populateCellGrid() {
@@ -34,9 +31,9 @@ class MainLayer {
             for (let j = 0; j < columnNumber; j++)
                 this.cells[i].push(Math.random() > 0.5 ? 1 : 0);
         }
-        this.prev_cells = [];
-        for (let i = 1; i < 4; i++) {
-            this.prev_cells.push(this.cells);
+        this.phase = [];
+        for (let i = 0; i < 4; i++) {
+            this.phase.push(this.cells);
         }
     }
 
@@ -67,14 +64,14 @@ class MainLayer {
         .setPipeline(true);
 
         this.paintCells = this.gpu.createKernel(
-            function(history0, history1, history2, history3) {
-                let h0 = history0[this.thread.y][this.thread.x];
-                let h1 = history1[this.thread.y][this.thread.x];
-                let h2 = history2[this.thread.y][this.thread.x];
-                let h3 = history3[this.thread.y][this.thread.x];
-                let g = (h0 * h1 + h2 * h3) / 2.0;
-                let r = h0 * h2;
-                let b = h1 * h3;
+            function(phase0, phase1, phase2, phase3) {
+                let p0 = phase0[this.thread.y][this.thread.x];
+                let p1 = phase1[this.thread.y][this.thread.x];
+                let p2 = phase2[this.thread.y][this.thread.x];
+                let p3 = phase3[this.thread.y][this.thread.x];
+                let g = (p0 * p1 + p1 * p2 + p2 * p3 + p3 * p0) / 4.0;
+                let r = (p0 + p2) / 2.0;
+                let b = (p1 + p3) / 2.0;
                 let green = (g <= 0.0 ? 0.0 :
                              g >= 1.0 ? 1.0 :
                              g);

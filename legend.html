@@ -1,0 +1,71 @@
+<html>
+  <head>
+    <title>color legend</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <script>
+      function to_rgb(p0, p1, p2, p3) {
+          let g = (p0 * p1 + p1 * p2 + p2 * p3 + p3 * p0) / 4.0;
+          let r = (p0 + p2) / 2.0;
+          let b = (p1 + p3) / 2.0;
+
+          let green = Math.max(0.0, Math.min(1.0, g));
+          let red   = Math.max(0.0, Math.min(1.0, r));
+          let blue  = Math.max(0.0, Math.min(1.0, b));
+          return `rgb(${red * 100}% ${green * 100}% ${blue * 100}%)`;
+      }
+    </script>
+  </head>
+
+  <body>
+    <div id="app">
+      <table>
+        <thead>
+          <tr>
+            <th>φ0</th>
+            <th>φ1</th>
+            <th>φ2</th>
+            <th>φ3</th>
+            <th>color</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr
+            v-for="p in Array.from(
+              { length: 16 },
+              (_, n) => n.toString(2)
+              .padStart(4, '0')
+              .split('').map(Number)
+              ).reverse()">
+            <td>{{ p[0] }}</td>
+            <td>{{ p[1] }}</td>
+            <td>{{ p[2] }}</td>
+            <td>{{ p[3] }}</td>
+            <td>
+              <span
+                :style="{
+                        display: 'inline-block',
+                        width: '3em',
+                        height: '2em',
+                        backgroundColor: to_rgb(p[0], p[1], p[2], p[3])
+                        }"
+                ></span>
+              {{ to_rgb(p[0], p[1], p[2], p[3]) }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <script>
+      const { createApp } = Vue;
+
+      createApp({
+        methods: {
+          to_rgb
+        }
+      }).mount('#app');
+    </script>
+  </body>
+</html>
