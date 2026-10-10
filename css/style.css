@@ -1,10 +1,20 @@
 @import "./canvasBackground.css";
 
 * { padding: 0; margin: 0; }
+#nca-viewport {
+    overflow: hidden;
+    position: relative;
+    touch-action: none;
+}
+
 canvas {
     background: #fff;
     display: block;
     margin: 0 auto;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+    image-rendering: pixelated;
 }
 
 body {

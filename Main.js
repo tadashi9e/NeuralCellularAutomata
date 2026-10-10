@@ -4,6 +4,65 @@ const gl = canvas.getContext('webgl2', { premultipliedAlpha: false });
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+let panX = 0;
+let panY = 0;
+let scale = 1.0;
+var prev_clientX = null;
+var prev_clientY = null;
+window.addEventListener(
+    "key", function(event) {
+        // reset
+        panX = 0;
+        panY = 0;
+        scale = 1.0;
+    });
+window.addEventListener(
+    "wheel", function(event) {
+        prev_clientX = null;
+        prev_clientY = null;
+        event.preventDefault();
+        let newScale = scale - 0.001 * event.deltaY;
+        if (newScale < 1.0) {
+            newScale = 1.0;
+        }
+        let x = (event.offsetX - panX) / scale;
+        let y = (event.offsetY - panY) / scale;
+        panX = event.offsetX - x * newScale;
+        panY = event.offsetY - y * newScale;
+        scale = newScale;
+        console.log(`translate(${panX}px, ${panY}px) scale(${scale})`);
+        canvas.style.transform =
+            `translate(${panX}px, ${panY}px) scale(${scale})`;
+    });
+window.addEventListener(
+    "pointerdown", function(event) {
+        prev_clientX = event.clientX;
+        prev_clientY = event.clientY;
+    });
+window.addEventListener(
+    "pointerup", function(event) {
+        prev_clientX = null;
+        prev_clientY = null;
+    });
+window.addEventListener(
+    "pointercancel", function(event) {
+        prev_clientX = null;
+        prev_clientY = null;
+    });
+window.addEventListener(
+    "pointermove", function(event) {
+        if (prev_clientX == null || prev_clientY == null) {
+            return;
+        }
+        panX += event.clientX - prev_clientX;
+        panY += event.clientY - prev_clientY;
+        prev_clientX = event.clientX;
+        prev_clientY = event.clientY;
+        console.log(`translate(${panX}px, ${panY}px) scale(${scale})`);
+        canvas.style.transform =
+            `translate(${panX}px, ${panY}px) scale(${scale})`;
+    });
+
 let layer;
 
 function start() {
@@ -24,30 +83,6 @@ function loop(){
         cycle = 0;
     }
     requestAnimationFrame(() => loop());
-}
-
-const ongoingTouches = [];
-window.addEventListener("pointerdown", handleStart, false);
-window.addEventListener("pointermove", handleMove, false);
-window.addEventListener("pointerup", handleEnd, false);
-window.addEventListener("pointercancel", handleEnd, false);
-
-function handleStart(event) {
-    ongoingTouches.push(event);
-    layer.handleTouch(ongoingTouches);
-}
-
-function handleMove(event) {
-    let movingPointers = ongoingTouches.findIndex((tch) => tch.pointerId == event.pointerId);
-    if (movingPointers >= 0) {
-        ongoingTouches.splice(movingPointers, 1, event); 
-        layer.handleTouch(ongoingTouches);
-    }
-}
-
-function handleEnd(event) {
-    let touchIndex = ongoingTouches.findIndex((tch) => tch.pointerId == event.pointerId)
-    ongoingTouches.splice(touchIndex, 1); 
 }
 
 start();

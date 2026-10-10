@@ -70,6 +70,7 @@ class MainLayer {
                 let p2 = phase2[this.thread.y][this.thread.x];
                 let p3 = phase3[this.thread.y][this.thread.x];
                 let g = (p0 * p1 + p1 * p2 + p2 * p3 + p3 * p0) / 4.0;
+                // let g = (p0 + p1 + p2 + p3) / 4.0;
                 let r = (p0 + p2) / 2.0;
                 let b = (p1 + p3) / 2.0;
                 let green = (g <= 0.0 ? 0.0 :
@@ -84,25 +85,6 @@ class MainLayer {
                 this.color(red, green, blue, 1);
             }).setOutput([columnNumber, rowNumber])
             .setGraphical(true);
-
-        this.fillCellArea = this.gpu.createKernel(function(columnNumber, rowNumber, cellMatrix, x, y) {
-            let cellValue = cellMatrix[this.thread.y][this.thread.x];
-            if (Math.abs(this.thread.x - x) < 10 && Math.abs(rowNumber - this.thread.y - y) < 10)
-                return Math.random() > 0.5 ? 1 : 0;
-            return cellValue;
-        }, { immutable: true })
-        .setOutput([columnNumber, rowNumber])
-        .setPipeline(true);
-    }
-
-    handleTouch(ongoingTouches) {
-        ongoingTouches
-            .map(t => { let coord = { X: t.clientX, Y: t.clientY }; return coord; })
-            .forEach(coord => {
-                let touchResult = this.fillCellArea(columnNumber, rowNumber, this.cells, coord.X, coord.Y);
-                if (this.cells.delete) this.cells.delete();
-                this.cells = touchResult;
-            });
     }
 }
 
