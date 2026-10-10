@@ -4,18 +4,36 @@ const gl = canvas.getContext('webgl2', { premultipliedAlpha: false });
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+let pause = false;
+let slowdown = 0;
+document.addEventListener(
+    "keydown", function(event) {
+        if (event.key == 'ArrowLeft') {
+            pause = true;
+            return;
+        }
+        if (event.key == 'ArrowRight') {
+            pause = false;
+            return;
+        }
+        if (event.key == 'ArrowDown') {
+            slowdown++;
+            return;
+        }
+        if (event.key == 'ArrowUp') {
+            slowdown--;
+            if (slowdown < 0) {
+                slowdown = 0;
+            }
+            return;
+        }
+    });
+
 let panX = 0;
 let panY = 0;
 let scale = 1.0;
-var prev_clientX = null;
-var prev_clientY = null;
-window.addEventListener(
-    "key", function(event) {
-        // reset
-        panX = 0;
-        panY = 0;
-        scale = 1.0;
-    });
+let prev_clientX = null;
+let prev_clientY = null;
 window.addEventListener(
     "wheel", function(event) {
         prev_clientX = null;
@@ -71,16 +89,24 @@ function start() {
     loop();
 }
 
-var cycle = 0;
+let drawcycle = 0;
+let cycle = 0;
 
 function loop(){
-    layer.update(cycle);
-    if (cycle == 3) {
-        layer.draw();
-    }
-    cycle++;
-    if (cycle >= 4) {
-        cycle = 0;
+    if (!pause) {
+        if (drawcycle <= slowdown) {
+            drawcycle++;
+        } else {
+            drawcycle = 0;
+            layer.update(cycle);
+            if (cycle == 3) {
+                layer.draw();
+            }
+            cycle++;
+            if (cycle >= 4) {
+                cycle = 0;
+            }
+        }
     }
     requestAnimationFrame(() => loop());
 }
