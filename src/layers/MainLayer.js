@@ -16,8 +16,11 @@ class MainLayer {
         this.cells = cellTexture;
     }
 
-    draw() {
-        this.paintCells(
+    draw1() {
+        this.paintCells1(this.cells, cellColor.r, cellColor.g, cellColor.b);
+    }
+    draw4() {
+        this.paintCells4(
             this.phase[0],
             this.phase[1],
             this.phase[2],
@@ -63,7 +66,15 @@ class MainLayer {
         .setOutput([columnNumber, rowNumber])
         .setPipeline(true);
 
-        this.paintCells = this.gpu.createKernel(
+        this.paintCells1 =
+            this.gpu.createKernel(function(cellMatrix, r, g, b) {
+                let cellValue = cellMatrix[this.thread.y][this.thread.x];
+                cellValue > 0.1
+                    ? this.color(r*cellValue, g*cellValue, b*cellValue, 1)
+                    : this.color(0,0,0);
+            }).setOutput([columnNumber, rowNumber])
+            .setGraphical(true);
+        this.paintCells4 = this.gpu.createKernel(
             function(phase0, phase1, phase2, phase3) {
                 let p0 = phase0[this.thread.y][this.thread.x];
                 let p1 = phase1[this.thread.y][this.thread.x];
