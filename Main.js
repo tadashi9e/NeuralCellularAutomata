@@ -123,7 +123,9 @@ let drawcycle = 0;
 let cycle = 0;
 
 function loop(){
-    if (!pause) {
+    if (pause && cycle == 0) {
+        console.log("pause");
+    } else {
         if (drawcycle <= slowdown) {
             drawcycle++;
         } else {
